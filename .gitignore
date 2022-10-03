@@ -17,6 +17,8 @@ _mailinglist
 docs/_build/
 __pycache__
 .env_file
+server_deploy
+.vscode
 
 # Coverage reports
 htmlcov/
@@ -29,3 +31,4 @@ htmlcov/
 .direnv
 
 .github/**
+docker.bkp

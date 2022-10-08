@@ -18,15 +18,16 @@ python --version
 
 2. **Virtual Environment** - We recommend working within a virtual environment whenever using Python for projects. This keeps your dependencies for each project separate and organized. Instructions for setting up a virual environment for your platform can be found in the [python docs](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
 
-3. Docker Desktop - Installation instructions for all OSes can be found <a href="https://docs.docker.com/install/" target="_blank">here</a>.
+3. **Docker Desktop** - Installation instructions for all OSes can be found <a href="https://docs.docker.com/install/" target="_blank">here</a>.
 
-4. Git: <a href="https://git-scm.com/downloads" target="_blank">Download and install Git</a> for your system. 
+4. **Git**: <a href="https://git-scm.com/downloads" target="_blank">Download and install Git</a> for your system. 
 
-5. Code editor: You can <a href="https://code.visualstudio.com/download" target="_blank">download and install VS code</a> here.
+5. **Code editor**: You can <a href="https://code.visualstudio.com/download" target="_blank">download and install VS code</a> here.
 
-6. AWS Account - An account is required to create resources needed for the deployment.
+6. **AWS Account** - An account is required to create resources needed for the deployment.
 
-7. Python package manager - PIP 19.x or higher. PIP is already installed in Python 3 >=3.4 downloaded from python.org . However, you can upgrade to a specific version, say 20.2.3, using the command:
+7. **Python package manager** - PIP 19.x or higher. PIP is already installed in Python 3 >=3.4 downloaded from python.org . However, you can upgrade to a specific version, say 20.2.3, using the command:
+
 ```bash
 #  Mac/Linux/Windows Check the current version
 pip --version
@@ -36,13 +37,13 @@ pip install --upgrade pip==20.2.3
 python -m pip install --upgrade pip==20.2.3
 ```
 
-8. Terminal - This is required to interact with CLI of the utitlities.
-- Mac/Linux users can use the default terminal.
-- Windows users can use either the GitBash terminal or WSL. 
+8. **Terminal** - This is required to interact with CLI of the utitlities.
+- Mac/Linux users: Can use the default terminal.
+- Windows users: GitBash terminal or WSL is recommended 
 
-9. Command line utilities - Utilities that are required to deploy on AWS.
+9. **Command line utilities** - Utilities that are required to deploy on AWS.
 
-- **AWS CLI:** Installed and configured using the `aws configure` command. Another important configuration is the region. Do not use the `us-east-1` because the cluster creation usually fails in `us-east-1`. Change the default region to `us-east-2`:
+  - **AWS CLI:** Installed and configured using the `aws configure` command. Another important configuration is the region. Do not use the `us-east-1` because the cluster creation usually fails in `us-east-1`. Change the default region to `us-east-2`:
 
   ```bash
   aws configure set region us-east-2  
@@ -50,9 +51,9 @@ python -m pip install --upgrade pip==20.2.3
 
   Ensure to create all your resources in a single region. 
 
-- **EKSCTL:** Installed in your system. Follow the instructions [available here](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html#installing-eksctl) or [here](https://eksctl.io/introduction/#installation) to download and install `eksctl` utility. 
+  - **EKSCTL:** Installed in your system. Follow the instructions [available here](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html#installing-eksctl) or [here](https://eksctl.io/introduction/#installation) to download and install `eksctl` utility. 
 
-- **Kubernetes CLI:** Installed in your system. Installation instructions for kubectl can be found [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+  - **Kubernetes CLI:** Installed in your system. Installation instructions for kubectl can be found [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 
 
 #### Install Dependencies
@@ -92,6 +93,7 @@ From within the directory first ensure you are working using your created virtua
 Each time you open a new terminal session, run:
 
 ```bash
+export JWT_SECRET=myjwtsecret
 export FLASK_APP=main.py
 export FLASK_ENV=development
 flask run
@@ -102,6 +104,7 @@ These commands put the application in development and directs our application to
 Or alternatively, execute:
 
 ```bash
+export JWT_SECRET=myjwtsecret
 export FLASK_APP=main.py
 flask --reload
 ```
@@ -198,15 +201,16 @@ Notice that the app will be running on `127.0.0.1:80`
 
 ## Deployment
 
-This app is deployed in AWS on Kubernetes:
+This app is deployed in AWS on Kubernetes, the steps followed to deploy the app are:
 
-1. Create a cluster
+1. **Create a cluster**
 
 ```bash
 eksctl create cluster --name simple-jwt-api --nodes=2 --version=1.23 --instance-types=t2.medium --region=us-east-2
 ```
 
-This will inform with messages such as:
+This will return:
+
 ```
 2022-10-04 14:28:39 [✔]  saved kubeconfig as "C:\\Users\\kidusmik\\.kube\\config"
 2022-10-04 14:28:39 [✔]  all EKS cluster resources for "simple-jwt-api" have been created
@@ -217,47 +221,50 @@ This will inform with messages such as:
 2022-10-04 14:30:38 [✔]  EKS cluster "simple-jwt-api" in "us-east-2" region is ready
 ```
 
-2. Check the status of tahe Nodes:
+2. **Check the status of the Nodes**
+
 ```bash
 kubectl get nodes
 ```
 
-This will show:
+This will return:
+
 ```
 NAME                                           STATUS   ROLES    AGE     VERSION
 ip-192-168-25-243.us-east-2.compute.internal   Ready    <none>   6m39s   v1.23.9-eks-ba74326
 ip-192-168-66-129.us-east-2.compute.internal   Ready    <none>   6m45s   v1.23.9-eks-ba74326
 ```
 
-3. Fetch the caller identity and use this on configuration and yaml files:
+3. **Fetch the caller identity**
 
 ```bash
 aws sts get-caller-identity --query Account --output text
 ```
 
-Returns:
+This will return:
 ```
 026423306961
 ```
 
-4. Create a role for Kubectl to assume
+4. **Create a role for Kubectl to assume**
 
 ```bash
 aws iam create-role --role-name UdacityFlaskDeployCBKubectlRole --assume-role-policy-document file://trust.json --output text --query 'Role.Arn'
 ```
 
-Returns:
+This will return:
 ```
 arn:aws:iam::026423306961:role/UdacityFlaskDeployCBKubectlRole
 ```
 
-5. Set the JWT_SECRET environment variable
+5. **Set the JWT_SECRET environment variable**
 
 ```bash
 aws ssm put-parameter --name JWT_SECRET --overwrite --value "myjwtsecret" --type SecureString
 ```
 
-Returns:
+This will return:
+
 ```json
 {
     "Version": 1,
@@ -265,13 +272,13 @@ Returns:
 }
 ```
 
-6. Check if the the JWT_SECRET environment variable is set
+6. **Check if the JWT_SECRET environment variable is set**
 
 ```bash
 aws ssm get-parameter --name JWT_SECRET
 ```
 
-Returns:
+This will return:
 
 ```json
 {
@@ -287,13 +294,13 @@ Returns:
 }
 ```
 
-7. Get the external IP so that it can be tested:
+7. **Get the external IP address or URL**
 
 ```bash
 kubectl get services simple-jwt-api -o wide
 ```
 
-Returns:
+This will return:
 
 ```
 NAME             TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)        AGE   SELECTOR

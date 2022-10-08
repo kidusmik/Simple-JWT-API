@@ -183,7 +183,7 @@ python test_main.py
 
 ## Dockerizing
 
-The app can be containerized usaiang Docker and can be tested before deployment.
+The app can be containerized using Docker and can be tested before deployment.
 
 1. Containerize the app
 
@@ -300,7 +300,7 @@ This will return:
 }
 ```
 
-7. **Get the external IP address or URL**
+7. **Get the external IP address/URL**
 
 ```bash
 kubectl get services simple-jwt-api -o wide
@@ -313,9 +313,48 @@ NAME             TYPE           CLUSTER-IP       EXTERNAL-IP                    
 simple-jwt-api   LoadBalancer   10.100.176.163   a4dfaec9cd70246a787306736f2e642c-1823854276.us-east-2.elb.amazonaws.com   80:32611/TCP   12m   app=simple-jwt-api
 ```
 
+## Un-Deployment
+It is crucial to delete the stacks if we no longer want our app to be deployed, therefore we must delete all the resources:
+
+1. **Delete all the EKS clusters**
+
+```bash
+eksctl delete cluster simple-jwt-api  --region=us-east-2
+```
+
+This will return:
+
+```
+2022-10-05 12:49:21 [ℹ]  deleting EKS cluster "simple-jwt-api"
+2022-10-05 12:49:43 [ℹ]  deleted 0 Fargate profile(s)
+2022-10-05 12:49:50 [✔]  kubeconfig has been updated
+2022-10-05 12:49:51 [ℹ]  cleaning up AWS load balancers created by Kubernetes objects of Kind Service or Ingress
+2 sequential tasks: { delete nodegroup "ng-3172ae09", delete cluster control plane "simple-jwt-api" [async]
+}
+2022-10-05 12:51:37 [ℹ]  will delete stack "eksctl-simple-jwt-api-nodegroup-ng-3172ae09"
+2022-10-05 12:51:37 [ℹ]  waiting for stack "eksctl-simple-jwt-api-nodegroup-ng-3172ae09" to get deleted
+2022-10-05 12:51:38 [ℹ]  waiting for CloudFormation stack "eksctl-simple-jwt-api-nodegroup-ng-3172ae09"
+2022-10-05 13:00:08 [ℹ]  will delete stack "eksctl-simple-jwt-api-cluster"
+2022-10-05 13:00:11 [✔]  all cluster resources were deleted
+```
+
+2. **Manually delete the CI/CD CloudFormation stack**
+
+3. **Delete the JWT_SECRET environment variable**
+
+```bash
+aws ssm delete-parameter --name JWT_SECRET
+```
+
+4. **Manually Delete all S3 Buckets that were created**
+
+**S3** Buckets are automatically created when forming the stacks, so you must first `empty` the buckets and then `delete` them.
+The two buckets that were created in my stack were:
+- `cf-templates-1mllchso5ksca-us-east-2`
+- `myfsndstack-codepipelineartifactbucket-13lwea4h82swt`
+
 ## Authors
 The Udacity Team and yours truly, Kidus Worku
-
 
 ## Acknowledgements 
 The awesome team at Udacity and the ALX-T community.

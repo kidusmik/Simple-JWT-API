@@ -191,6 +191,12 @@ The app can be containerized usaiang Docker and can be tested before deployment.
 docker build -t simple-jwt-api .
 ```
 
+Alternateively, you can pull this docker containeized image from my repository by running:
+
+```bash
+docker pull kidusmik/simple-jwt-api:latest
+```
+
 2. Run the container
 
 ```bash
